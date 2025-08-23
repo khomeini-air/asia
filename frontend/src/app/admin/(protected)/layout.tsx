@@ -9,15 +9,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    // This check is simple; a real app would verify a token.
     if (!isAuthenticated) {
-      router.push("/login");
+      router.push("/admin/login");
     }
   }, [isAuthenticated, router]);
 
   const handleLogout = () => {
     logout();
-    router.push("/login");
+    router.push("/admin/login");
   };
 
   if (!isAuthenticated) {

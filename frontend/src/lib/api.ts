@@ -1,8 +1,20 @@
 export interface Task {
   id?: number;
-  shortName: string;
+  taskName: string;
   title: string;
   description: string;
+}
+
+export interface CandidateTask {
+  uuid?: string; // Changed from id
+  email: string;
+  firstName: string;
+  lastName: string;
+  taskId: number;
+  taskName: string;
+  duration: number;
+  extraTime: number;
+  submissionLink?: string;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
@@ -52,6 +64,44 @@ export const updateTask = async (id: number, task: Task): Promise<Task> => {
 
 export const deleteTask = async (id: number): Promise<void> => {
   const response = await fetch(`${API_URL}/tasks/${id}`, {
+    method: 'DELETE',
+  });
+  await handleResponse<void>(response);
+};
+
+export const getCandidateTasks = async (): Promise<CandidateTask[]> => {
+  const response = await fetch(`${API_URL}/candidateTask`);
+  return handleResponse<CandidateTask[]>(response);
+};
+
+export const createCandidateTask = async (candidateTask: CandidateTask): Promise<CandidateTask> => {
+  const response = await fetch(`${API_URL}/candidateTask`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(candidateTask),
+  });
+  // Special handling for 409 Conflict error
+  if (response.status === 409) {
+    throw new Error('Email already exists. Please use a different email.');
+  }
+  return handleResponse<CandidateTask>(response);
+};
+
+export const updateCandidateTask = async (id: string, candidateTask: CandidateTask): Promise<CandidateTask> => {
+  const response = await fetch(`${API_URL}/candidateTask/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(candidateTask),
+  });
+  return handleResponse<CandidateTask>(response);
+};
+
+export const deleteCandidateTask = async (uuid: string): Promise<void> => {
+  const response = await fetch(`${API_URL}/candidateTask/${uuid}`, {
     method: 'DELETE',
   });
   await handleResponse<void>(response);

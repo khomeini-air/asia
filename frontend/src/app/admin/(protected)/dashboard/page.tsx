@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import TaskManager from "@/components/TaskManager";
+import ApplicantManager from "@/components/ApplicantManager"; // <-- Import the new component
 
 type Tab = "tasks" | "applicants";
 
@@ -41,14 +42,8 @@ export default function DashboardPage() {
       <div className="mt-6">
         {activeTab === "tasks" && <TaskManager />}
 
-        {activeTab === "applicants" && (
-          <div className="p-6 bg-white rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold text-gray-700">Add Candidates</h2>
-            <p className="mt-4 text-gray-500">
-              This feature is coming soon. You will be able to add and manage job applicants from this page.
-            </p>
-          </div>
-        )}
+        {/* Replace the placeholder with the new component */}
+        {activeTab === "applicants" && <ApplicantManager />}
       </div>
     </div>
   );

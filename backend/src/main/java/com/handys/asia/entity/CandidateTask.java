@@ -1,21 +1,25 @@
 package com.handys.asia.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.UuidGenerator;
 
-import java.sql.Timestamp;
+import java.util.UUID;
 
 @Entity
 @Table(name = "candidates")
 @Getter
 @Setter
-public class CandidateTask {
+@SuperBuilder(toBuilder = true)
+@EqualsAndHashCode(callSuper = true)
+@AllArgsConstructor
+@NoArgsConstructor
+public class CandidateTask extends BasedEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
+    private UUID id;
 
     @Column(name = "email", nullable = false)
     private String email;
@@ -26,7 +30,7 @@ public class CandidateTask {
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name="task_id", referencedColumnName = "id")
     private Task task;
 
@@ -36,14 +40,6 @@ public class CandidateTask {
     @Column(name="extra_time")
     private Long extraTime;
 
-    @Column(name="delivery_link")
-    private String link;
-
-    @CreationTimestamp
-    @Column(name = "created_at", columnDefinition = "TIMESTAMP default CURRENT_TIMESTAMP")
-    private Timestamp createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at", columnDefinition = "TIMESTAMP default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP")
-    private Timestamp updatedAt;
+    @Column(name="submission_link")
+    private String submissionLink;
 }

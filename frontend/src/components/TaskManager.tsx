@@ -3,7 +3,7 @@ import { useState, useEffect, FormEvent } from "react";
 import { getTasks, createTask, updateTask, deleteTask, Task } from "@/lib/api";
 
 const initialFormState: Task = {
-  shortName: "",
+  taskName: "",
   title: "",
   description: "",
 };
@@ -39,7 +39,7 @@ export default function TaskManager() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!formData.shortName || !formData.title || !formData.description) {
+    if (!formData.taskName || !formData.title || !formData.description) {
         alert("Please fill all fields");
         return;
     }
@@ -87,8 +87,8 @@ export default function TaskManager() {
         <h3 className="mb-4 text-xl font-semibold">{isEditing ? "Edit Task" : "Create New Task"}</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="shortName" className="block text-sm font-medium text-gray-700">Short Name (max 15 char)</label>
-            <input type="text" name="shortName" value={formData.shortName} onChange={handleInputChange} maxLength={15} required className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"/>
+            <label htmlFor="taskName" className="block text-sm font-medium text-gray-700">Task Name (max 15 char)</label>
+            <input type="text" name="taskName" value={formData.taskName} onChange={handleInputChange} maxLength={15} required className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"/>
           </div>
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
@@ -116,7 +116,7 @@ export default function TaskManager() {
                 <div key={task.id} className="p-4 border border-gray-200 rounded-lg">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="font-bold text-gray-800">{task.title} <span className="text-sm font-normal text-gray-500">({task.shortName})</span></h4>
+                      <h4 className="font-bold text-gray-800">{task.taskName} : <span className="text-sm font-normal text-gray-800">{task.title}</span></h4>
                       <p className="mt-1 text-sm text-gray-600">{task.description}</p>
                     </div>
                     <div className="flex space-x-2">
