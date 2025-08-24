@@ -18,7 +18,7 @@ This project is a full-stack web application designed to automate the process of
 
 1.  **Clone the repository:**
     ```sh
-    git clone <your-repository-url>
+    git clone https://github.com/khomeini-air/asia
     cd asia
     ```
 
@@ -30,7 +30,8 @@ This project is a full-stack web application designed to automate the process of
     - You can remove `--build` flag for the subsequent requests.
 
 3.  **Access the application:**
-    - **Frontend (Admin Portal)**: [http://localhost:3000/admin/login](http://localhost:3000/admin/login)
+    - **Admin Portal**: [http://localhost:3000/admin/login](http://localhost:3000/admin/login)
+    - **Candidate Portal**: [http://localhost:3000/candidate/task/{:uuid}](http://localhost:3000/candidate/task/{:uuid}) or copy-paste from the Admin portal
     - **Backend API**: [http://localhost:8080/api/](http://localhost:8080/api)
 
 ## Admin Login Credentials
@@ -49,3 +50,8 @@ You can connect to the PostgreSQL database directly using a client like pgAdmin 
 - **Database**: `asia_db`
 - **Username**: `admin`
 - **Password**: `password`
+
+## Next Improvements
+- Implement logging and unit testing.
+- Implement pagination on the admin dashboard page.
+- Prevent update on the candidate task if it's already submitted.
