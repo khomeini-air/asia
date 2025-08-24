@@ -4,7 +4,7 @@ This project is a full-stack web application designed to automate the process of
 
 ## Tech Stack
 
-- **Backend**: Spring Boot 3, Java 11
+- **Backend**: Spring Boot 3, Java 17
 - **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
 - **Database**: PostgreSQL
 - **Containerization**: Docker & Docker Compose
@@ -27,11 +27,11 @@ This project is a full-stack web application designed to automate the process of
     docker-compose up --build
     ```
 
-    - The `--build` flag is only necessary the first time you run it or after making changes to the code or Dockerfiles.
+    - You can remove `--build` flag for the subsequent requests.
 
 3.  **Access the application:**
-    - **Frontend (Admin Portal)**: [http://localhost:3000](http://localhost:3000)
-    - **Backend API**: [http://localhost:8080](http://localhost:8080)
+    - **Frontend (Admin Portal)**: [http://localhost:3000/admin/login](http://localhost:3000/admin/login)
+    - **Backend API**: [http://localhost:8080/api/](http://localhost:8080/api)
 
 ## Admin Login Credentials
 
@@ -42,7 +42,7 @@ A simple hard-coded login is used for the admin portal:
 
 ## Database Access (Optional)
 
-You can connect to the PostgreSQL database directly using a client like DBeaver or pgAdmin with the following credentials:
+You can connect to the PostgreSQL database directly using a client like pgAdmin with the following credentials:
 
 - **Host**: `localhost`
 - **Port**: `5432`
