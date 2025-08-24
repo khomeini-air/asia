@@ -1,6 +1,7 @@
 package com.handys.asia.service;
 
 import com.handys.asia.api.controller.request.CreateOrUpdateCandidateTaskRequest;
+import com.handys.asia.api.controller.request.SubmitTaskRequest;
 import com.handys.asia.api.controller.response.CandidateTaskResponse;
 
 import java.util.List;
@@ -12,4 +13,6 @@ public interface CandidateTaskService {
     CandidateTaskResponse findById(UUID uuid);
     CandidateTaskResponse update(UUID uuid, CreateOrUpdateCandidateTaskRequest candidateTask);
     void deleteById(UUID id);
+    void startTaskById(UUID id);
+    void submitTaskById(UUID id, SubmitTaskRequest request);
 }

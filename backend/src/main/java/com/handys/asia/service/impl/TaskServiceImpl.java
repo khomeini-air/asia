@@ -13,8 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -49,7 +48,7 @@ public class TaskServiceImpl implements TaskService {
         task.setTitle(taskRequest.getTitle());
         task.setTaskName(taskRequest.getTaskName());
         task.setDescription(taskRequest.getDescription());
-        task.setUpdatedAt(Timestamp.valueOf(LocalDateTime.now()));
+        task.setUpdatedAt(Instant.now());
 
         return TaskConverter.toTaskResponse(taskRepository.save(task));
     }

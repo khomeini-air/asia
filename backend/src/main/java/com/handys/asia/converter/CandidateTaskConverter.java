@@ -22,8 +22,9 @@ public class CandidateTaskConverter {
                 .taskName(candidate.getTask().getTaskName())
                 .submissionLink(candidate.getSubmissionLink())
                 .createdBy(candidate.getCreatedBy())
-//                .createdAt(LocalTimeConverter.toLocalTime(candidate.getCreatedAt().getTime()))
-//                .updatedAt(LocalTimeConverter.toLocalTime(candidate.getUpdatedAt().getTime()))
+                .startedAt(candidate.getStartedAt() == null ? null : candidate.getStartedAt().toEpochMilli())
+                .submittedAt(candidate.getSubmittedAt() == null ? null : candidate.getSubmittedAt().toEpochMilli())
+                .comments(candidate.getComment())
                 .build();
     }
 

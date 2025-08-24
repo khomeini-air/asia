@@ -1,12 +1,15 @@
 package com.handys.asia.service.impl;
 
 import com.handys.asia.api.controller.request.CreateOrUpdateCandidateTaskRequest;
+import com.handys.asia.api.controller.request.SubmitTaskRequest;
 import com.handys.asia.api.controller.response.CandidateTaskResponse;
 import com.handys.asia.converter.CandidateTaskConverter;
 import com.handys.asia.entity.CandidateTask;
 import com.handys.asia.entity.Task;
+import com.handys.asia.enums.TaskStatus;
 import com.handys.asia.exception.InvalidCandidateException;
 import com.handys.asia.exception.ResourceNotFoundException;
+import com.handys.asia.exception.TaskExpiryException;
 import com.handys.asia.repository.CandidateTaskRepository;
 import com.handys.asia.repository.TaskRepository;
 import com.handys.asia.service.CandidateTaskService;
@@ -16,8 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,7 +42,9 @@ public class CandidateTaskServiceImpl implements CandidateTaskService {
         Task task = getTask(request.getTaskId());
         validateEmailDuplicate(request.getEmail());
 
-        CandidateTask candidateTask = repository.save(CandidateTaskConverter.toCandidateTask(request, task));
+        CandidateTask candidateTask = CandidateTaskConverter.toCandidateTask(request, task);
+        candidateTask.setStatus(TaskStatus.CREATED);
+        candidateTask = repository.save(candidateTask);
 
         return CandidateTaskConverter.toCandidateTaskResponse(candidateTask);
     }
@@ -67,9 +72,8 @@ public class CandidateTaskServiceImpl implements CandidateTaskService {
 
     @Override
     public CandidateTaskResponse findById(UUID uuid) {
-        return repository.findById(uuid)
-                .map(CandidateTaskConverter::toCandidateTaskResponse)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format("Task id %s not found", uuid)));
+        CandidateTask candidateTask = getCandidateTask(uuid);
+        return CandidateTaskConverter.toCandidateTaskResponse(candidateTask);
     }
 
     @Override
@@ -80,23 +84,66 @@ public class CandidateTaskServiceImpl implements CandidateTaskService {
         repository.delete(task);
     }
 
+    @Override
+    @Transactional
+    public void startTaskById(UUID id) {
+        CandidateTask candidateTask = getCandidateTask(id);
+
+        validateExpiryTask(candidateTask);
+
+        candidateTask.setStartedAt(Instant.now());
+        candidateTask.setStatus(TaskStatus.CANDIDATE_STARTED);
+        repository.save(candidateTask);
+    }
+
+    @Override
+    @Transactional
+    public void submitTaskById(UUID id, SubmitTaskRequest request) {
+        CandidateTask candidateTask = getCandidateTask(id);
+
+        validateExpiryTask(candidateTask);
+
+        candidateTask.setSubmittedAt(Instant.ofEpochMilli(request.getSubmittedAt()));
+        candidateTask.setStatus(TaskStatus.CANDIDATE_COMPLETED);
+        repository.save(candidateTask);
+    }
+
+    private CandidateTask getCandidateTask(UUID id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format("Task id %s not found", id)));
+    }
+
     private Task getTask(Long id) {
         return taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Task id %s not found", id)));
     }
 
-    void validateEmailDuplicate(String email) {
+    private void validateEmailDuplicate(String email) {
         if(repository.existsByEmail(email)) {
             throw new InvalidCandidateException(String.format("User email %s already exists", email));
         }
     }
 
-    void updateCandidateTask(CandidateTask candidateTask, Task task, CreateOrUpdateCandidateTaskRequest request) {
+    private void updateCandidateTask(CandidateTask candidateTask, Task task, CreateOrUpdateCandidateTaskRequest request) {
         candidateTask.setFirstName(request.getFirstName());
         candidateTask.setLastName(request.getLastName());
         candidateTask.setTask(task);
         candidateTask.setDuration(request.getDuration());
         candidateTask.setExtraTime(request.getExtraTime());
-        candidateTask.setUpdatedAt(Timestamp.valueOf(LocalDateTime.now()));
+        candidateTask.setUpdatedAt(Instant.now());
+    }
+
+    private void validateExpiryTask(CandidateTask candidateTask) {
+        if (candidateTask == null || candidateTask.getStartedAt() == null) {
+            return;
+        }
+
+        Long duration = candidateTask.getDuration();
+        Long extra = candidateTask.getExtraTime();
+        Instant deadline = candidateTask.getStartedAt().plus(duration + extra, ChronoUnit.MINUTES);
+
+        if(Instant.now().isAfter(deadline)) {
+            throw new TaskExpiryException(String.format("Task %s has expired", candidateTask.getId()));
+        }
     }
 }

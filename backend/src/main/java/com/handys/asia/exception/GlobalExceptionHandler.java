@@ -22,6 +22,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
+    @ExceptionHandler(TaskExpiryException.class)
+    public ResponseEntity<String> handleEmailExist(TaskExpiryException ex) {
+        return ResponseEntity.status(HttpStatus.GONE).body(ex.getMessage());
+    }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGenericException(Exception ex) {

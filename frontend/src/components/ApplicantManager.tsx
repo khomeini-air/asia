@@ -3,7 +3,7 @@ import { useState, useEffect, FormEvent } from "react";
 import { getTasks, Task, createCandidateTask, getCandidateTasks, deleteCandidateTask, updateCandidateTask, CandidateTask } from "@/lib/api";
 import Modal from "./Modal";
 
-const initialFormState: Omit<CandidateTask, 'uuid' | 'submissionLink' | 'taskName'> & { taskId: number } = {
+const initialFormState: Omit<CandidateTask, 'uuid' | 'submissionLink' | 'taskName' | 'status' | 'startedAt' | 'submittedAt'> & { taskId: number } = {
   email: "",
   firstName: "",
   lastName: "",
@@ -21,7 +21,6 @@ export default function ApplicantManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // New state for update modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingApplicant, setEditingApplicant] = useState<CandidateTask | null>(null);
 
@@ -48,7 +47,6 @@ export default function ApplicantManager() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // New input change handler for the edit form
   const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     if (!editingApplicant) return;
     const { name, value } = e.target;
@@ -103,7 +101,6 @@ export default function ApplicantManager() {
       .catch(() => alert('Failed to copy URL.'));
   };
 
-  // New functions to handle update flow
   const handleUpdateClick = (applicant: CandidateTask) => {
     setEditingApplicant(applicant);
     setIsModalOpen(true);
@@ -137,6 +134,19 @@ export default function ApplicantManager() {
     }
   };
 
+  const formatTimestamp = (timestamp: string | undefined | null): string => {
+    if (!timestamp) {
+      return 'N/A';
+    }
+    return new Date(timestamp).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
   return (
     <>
       <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
@@ -144,7 +154,6 @@ export default function ApplicantManager() {
         <div className="p-6 bg-white rounded-lg shadow-md md:col-span-1">
           <h3 className="mb-4 text-xl font-semibold">Add New Applicant</h3>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* ... (existing form inputs) ... */}
             <div><label htmlFor="firstName" className="block text-sm font-medium text-gray-700">First Name</label><input type="text" name="firstName" value={formData.firstName} onChange={handleInputChange} required className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"/></div>
             <div><label htmlFor="lastName" className="block text-sm font-medium text-gray-700">Last Name</label><input type="text" name="lastName" value={formData.lastName} onChange={handleInputChange} required className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"/></div>
             <div><label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label><input type="email" name="email" value={formData.email} onChange={handleInputChange} required className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm"/></div>
@@ -165,30 +174,34 @@ export default function ApplicantManager() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Name</th>
-                    <th className="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Email</th>
                     <th className="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Task</th>
-                    <th className="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Duration</th>
-                    <th className="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Extra Time</th>
+                    <th className="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Started At</th>
+                    <th className="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Submitted At</th>
                     <th className="px-4 py-2 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {applicants.length > 0 ? applicants.map(applicant => {
-                    // Find the full task object to get the title for the tooltip
                     const assignedTask = tasks.find(task => task.id === applicant.taskId);
 
                     return (
                       <tr key={applicant.uuid}>
-                        <td className="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">{applicant.firstName} {applicant.lastName}</td>
-                        <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">{applicant.email}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">
+                          <div>{applicant.firstName} {applicant.lastName}</div>
+                          <div className="text-xs text-gray-500">{applicant.email}</div>
+                        </td>
                         <td
                           className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap"
-                          title={assignedTask?.title || 'No title available'} // This adds the hover tooltip
+                          title={assignedTask?.title || 'No title available'}
                         >
                           {applicant.taskName}
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">{applicant.duration} min</td>
-                        <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">{applicant.extraTime} min</td>
+                        <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
+                          {formatTimestamp(applicant.startedAt)}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
+                          {formatTimestamp(applicant.submittedAt)}
+                        </td>
                         <td className="px-4 py-3 text-sm font-medium whitespace-nowrap">
                           <div className="flex items-center space-x-2">
                             <button onClick={() => copyUrlToClipboard(applicant.uuid!)} className="px-3 py-1 text-sm font-semibold text-white bg-blue-600 rounded-md shadow-sm hover:bg-blue-700">Copy URL</button>
@@ -199,7 +212,7 @@ export default function ApplicantManager() {
                       </tr>
                     );
                   }) : (
-                    <tr><td colSpan={6} className="px-4 py-4 text-sm text-center text-gray-500">No applicants have been added yet.</td></tr>
+                    <tr><td colSpan={5} className="px-4 py-4 text-sm text-center text-gray-500">No applicants have been added yet.</td></tr>
                   )}
                 </tbody>
               </table>

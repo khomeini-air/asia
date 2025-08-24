@@ -15,6 +15,9 @@ export interface CandidateTask {
   duration: number;
   extraTime: number;
   submissionLink?: string;
+  status?: string;
+  startedAt?: string;
+  submittedAt?: string;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
@@ -105,4 +108,43 @@ export const deleteCandidateTask = async (uuid: string): Promise<void> => {
     method: 'DELETE',
   });
   await handleResponse<void>(response);
+};
+
+export const getCandidateTaskByUuid = async (uuid: string): Promise<CandidateTask> => {
+  const response = await fetch(`${API_URL}/candidateTask/${uuid}`);
+  if (!response.ok) {
+    throw new Error('Task not found or invalid link.');
+  }
+  return handleResponse<CandidateTask>(response);
+};
+
+export const getTaskDetails = async (id: number): Promise<Task> => {
+  const response = await fetch(`${API_URL}/tasks/${id}`);
+  return handleResponse<Task>(response);
+};
+
+export const startCandidateTask = async (uuid: string): Promise<void> => {
+  const response = await fetch(`${API_URL}/candidateTask/${uuid}/start`, { method: 'POST' });
+  if (response.status === 410) {
+    throw new Error('This task has expired and can no longer be started.');
+  }
+  await handleResponse<void>(response);
+};
+
+interface SubmissionBody {
+    submissionLink: string;
+    comments: string;
+    submittedAt: number;
+}
+
+export const submitCandidateTask = async (uuid: string, body: SubmissionBody): Promise<void> => {
+    const response = await fetch(`${API_URL}/candidateTask/${uuid}/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    if (response.status === 410) {
+        throw new Error("Time is out. Your submission could not be processed.");
+    }
+    await handleResponse<void>(response);
 };

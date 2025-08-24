@@ -16,8 +16,8 @@ public class TaskConverter {
                 .title(task.getTitle())
                 .description(task.getDescription())
                 .createdBy(task.getCreatedBy())
-                .createdAt(LocalTimeConverter.toLocalTime(task.getCreatedAt().getTime()))
-                .updatedAt(LocalTimeConverter.toLocalTime(task.getUpdatedAt().getTime())).
+                .createdAt(task.getCreatedAt().toEpochMilli())
+                .updatedAt(task.getUpdatedAt().toEpochMilli()).
                 build();
     }
 

@@ -1,6 +1,7 @@
 package com.handys.asia.api.controller;
 
 import com.handys.asia.api.controller.request.CreateOrUpdateCandidateTaskRequest;
+import com.handys.asia.api.controller.request.SubmitTaskRequest;
 import com.handys.asia.api.controller.response.CandidateTaskResponse;
 import com.handys.asia.service.CandidateTaskService;
 import jakarta.validation.Valid;
@@ -34,13 +35,25 @@ public class CandidateTaskController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CandidateTaskResponse> updateById(@PathVariable UUID id, @RequestBody CreateOrUpdateCandidateTaskRequest request) {
+    public ResponseEntity<CandidateTaskResponse> updateById(@PathVariable UUID id, @RequestBody @Valid CreateOrUpdateCandidateTaskRequest request) {
         return ResponseEntity.status(HttpStatus.OK).body(service.update(id, request));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTask(@PathVariable UUID id) {
         service.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{id}/start")
+    public ResponseEntity<Void> startTask(@PathVariable UUID id) {
+        service.startTaskById(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{id}/submit")
+    public ResponseEntity<Void> submitTask(@PathVariable UUID id, @RequestBody @Valid SubmitTaskRequest request) {
+        service.submitTaskById(id, request);
         return ResponseEntity.ok().build();
     }
 }
